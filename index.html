@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rock Paper Scissors Arena</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    {% if last and last.result == 'win' %}
+      <style>
+        /* full-screen confetti canvas styling */
+        .confetti-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; }
+      </style>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          // create a full-screen canvas element for confetti
+          var canvas = document.createElement('canvas');
+          canvas.className = 'confetti-canvas';
+          document.body.appendChild(canvas);
+
+          // create a confetti instance targeting the canvas, auto-resizing enabled
+          var myConfetti = confetti.create(canvas, { resize: true, useWorker: true });
+
+          // burst of confetti
+          myConfetti({ particleCount: 200, spread: 120, origin: { x: 0.5, y: 0.35 } });
+        });
+      </script>
+    {% endif %}
+  </head>
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <main class="w-full max-w-4xl bg-white rounded-xl shadow-lg p-16 mx-4">
+      <header class="text-center mb-8">
+        <h1 class="text-6xl font-extrabold text-gray-800">Rock Paper Scissors Arena</h1>
+        <p class="text-xl text-gray-500 mt-4">Choose your move and challenge the arena!</p>
+      </header>
+
+      <section class="flex flex-col md:flex-row items-center md:items-start md:space-x-8">
+        <div class="w-full md:w-2/3">
+          <form method="post" action="/play" class="flex flex-col items-center">
+            <div class="grid grid-cols-3 gap-6 w-full">
+              <button name="move" value="rock" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-8 text-3xl flex items-center justify-center shadow-lg transform transition duration-200 ease-out hover:scale-105 active:scale-95">👊<span class="sr-only">Rock</span></button>
+              <button name="move" value="paper" type="submit" class="bg-green-600 hover:bg-green-700 text-white rounded-xl py-8 text-3xl flex items-center justify-center shadow-lg transform transition duration-200 ease-out hover:scale-105 active:scale-95">🖐️<span class="sr-only">Paper</span></button>
+              <button name="move" value="scissors" type="submit" class="bg-amber-500 hover:bg-amber-600 text-white rounded-xl py-8 text-3xl flex items-center justify-center shadow-lg transform transition duration-200 ease-out hover:scale-105 active:scale-95">✌️<span class="sr-only">Scissors</span></button>
+            </div>
+          </form>
+
+          {% if last %}
+            <div class="mt-8 text-center" aria-live="polite">
+              <div class="inline-block animate-[fadeInDown_500ms_ease-out_forwards]">
+                {% if last.result == 'win' %}
+                  <div class="text-4xl md:text-5xl font-extrabold text-green-600">You win! 🎉</div>
+                {% elif last.result == 'loss' %}
+                  <div class="text-4xl md:text-5xl font-extrabold text-red-600">You lose. 😢</div>
+                {% else %}
+                  <div class="text-4xl md:text-5xl font-extrabold text-gray-700">It's a draw. 🤝</div>
+                {% endif %}
+
+                {% if story_message %}
+                  <div class="mt-2 text-2xl italic text-blue-700">{{ story_message }}</div>
+                {% endif %}
+
+                <div class="mt-2 text-lg text-gray-500">You played <span class="font-semibold">{{ last.player }}</span>, computer played <span class="font-semibold">{{ last.computer }}</span>.</div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <aside class="w-full md:w-1/3 mt-8 md:mt-0">
+          <div class="bg-gray-50 border border-gray-100 p-4 rounded-lg text-center">
+            <h2 class="text-lg font-semibold text-gray-700">Statistics</h2>
+            <div class="mt-4 space-y-2 text-gray-600">
+              <div class="flex justify-between"><span class="font-medium">Total</span><span>{{ total }}</span></div>
+              <div class="flex justify-between"><span class="font-medium">Wins</span><span class="text-green-600 font-semibold">{{ wins }}</span></div>
+              <div class="flex justify-between"><span class="font-medium">Losses</span><span class="text-red-600 font-semibold">{{ losses }}</span></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+      <div class="mt-8 text-center">
+        <a href="{{ url_for('reset') }}" class="inline-block bg-red-600 hover:bg-red-700 text-white rounded-md px-4 py-2 text-base md:text-lg">Reset Score</a>
+      </div>
+    </main>
+  </body>
+</html>
